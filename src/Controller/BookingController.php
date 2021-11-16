@@ -3,12 +3,18 @@
 
 namespace App\Controller;
 
-use App\Classes\Employee;
-use App\Classes\RegistrationFactory;
+use App\Form\OfficeFormType;
+use App\Services\Employee;
+use App\Services\RegistrationFactory;
+use App\Entity\EmployeeTbl;
+use App\Entity\OfficeTbl;
+use App\Form\EmployeeFormType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Config\Doctrine\Orm\EntityManagerConfig;
 
 class BookingController extends AbstractController {
     /**
@@ -16,36 +22,59 @@ class BookingController extends AbstractController {
      */
     public function homepage()
     {
-        return $this->render('homepage.html', []);
+        return $this->render('homepage.html.twig', []);
     }
 
     /**
      * @Route("/bookingController/addEmployee" );
      */
-    public function getAddEmployeeForm()
+    public function addEmployee(Request $request):Response
     {
-        return $this->render('addEmployee.html', []);
-    }
+        $employee = new EmployeeTbl();
+        $form = $this->createForm(EmployeeFormType::class, $employee);
+//        return $this->render('addEmployee.html.twig', []);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $task = $form->getData();
+            $registrationFactory = new RegistrationFactory();
+            $entityManager = $this->getDoctrine()->getManager();
+            $test = $registrationFactory->createEmployee($entityManager, $employee);
+            $test->addEmployeeToSystem($task);
 
-    /**
-     * @Route("/bookingController/addEmployee" methods={"POST"});
-     */
-    public function addEmployee(Request $request){
-        $firstName = $request->query->get('firstName');
-        $lastName = $request->query->get('lastName');
-        $email = $request->query->get('email');
-        $payrollNo = $request->query->get('payrollNo');
-        $registrationFactory = new RegistrationFactory();
-        $test = $registrationFactory->createEmployee($firstName, $lastName, $email, $payrollNo);
+            return $this->redirectToRoute('addEmployee');
+        }
+
+        return $this->renderForm('addEmployee.html.twig', [
+            'form' => $form,
+        ]);
     }
 
     /**
      * @Route("/bookingController/addOffice");
      */
-    public function addOffice()
+    public function addOffice(Request $request): Response
     {
-        return $this->render('addOffice.html', []);
+        $office = new OfficeTbl();
+        $form = $this->createForm(OfficeFormType::class, $office);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $task                = $form->getData();
+            $registrationFactory = new RegistrationFactory();
+            $entityManager       = $this->getDoctrine()->getManager();
+            $test                = $registrationFactory->createOffice($entityManager, $office);
+            $test->loopOffices( $form->get('noOfOffices')->getData(), $form->get('officeSeats')->getData());
+            //TODO get rid of hard code
+            return $this->redirectToRoute('/bookingController/addOffice');
+        }
+
+        return $this->renderForm('addOffice.html.twig', [
+            'form' => $form,
+        ]);
+
     }
+
+
 
     /**
      * @Route("/bookingController/

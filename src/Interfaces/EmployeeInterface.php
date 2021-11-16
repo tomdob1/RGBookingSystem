@@ -9,7 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 interface EmployeeInterface
 {
-    public function addEmployeeToSystem($firstName, $lastName, $employeeNo, $email, EmployeeTbl $employeeTable, EntityManagerInterface $entityManager): bool;
+    public function __construct($entityManager, EmployeeTbl $employeeTbl);
+
+    public function addEmployeeToSystem($task): bool;
 
 }
 

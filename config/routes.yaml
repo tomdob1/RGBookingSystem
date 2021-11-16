@@ -1,3 +1,7 @@
 #index:
 #    path: /
 #    controller: App\Controller\BookingController::index
+
+addEmployee:
+      path: /bookingController/addEmployee
+      controller: App\Controller\BookingController::addEmployee
