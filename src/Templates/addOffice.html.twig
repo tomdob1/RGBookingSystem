@@ -1,6 +1,24 @@
-{% extends 'layout.html' %}
+{% extends 'layout.html.twig' %}
 
 {% block content %}
   {{ form(form) }}
+  <table class="table table-bordered">
+    <thead>
+    <tr>
+      <th>Office Id</th>
+      <th>Number of Seats</th>
+
+    </tr>
+    </thead>
+    <tbody>
+
+    {% for tableResult in tableResults %}
+      <tr>
+        <td>Office {{ tableResult.getId() }} </td>
+        <td>{{ tableResult.getOfficeSeats() }} </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
 
 {% endblock %}

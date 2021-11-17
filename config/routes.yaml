@@ -5,3 +5,7 @@
 addEmployee:
       path: /bookingController/addEmployee
       controller: App\Controller\BookingController::addEmployee
+
+addOffice:
+      path: /bookingController/addOffice
+      controller: App\Controller\BookingController::addOffice

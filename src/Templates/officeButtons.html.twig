@@ -1,0 +1,11 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    {% for tableResult in tableResults %}
+    <div>
+        <button type="button" class="btn btn-lg btn-primary" ><a href="{{url}}/{{ tableResult.getId() }}">Office {{ tableResult.getId() }}</a></button>
+    </div>
+
+
+    {% endfor %}
+{% endblock %}

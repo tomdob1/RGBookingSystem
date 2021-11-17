@@ -1,0 +1,52 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="navbar-collapse collapse ">
+                <ul class="nav navbar-nav ">
+                    <li class=""><a href="/bookingController/viewBookings/{{ days[0] }}/{{ officeId }}">Monday</a></li>
+                    <li><a href="/bookingController/viewBookings/{{ days[1] }}/{{ officeId }}">Tuesday</a></li>
+                    <li><a href="/bookingController/viewBookings/{{ days[2] }}/{{ officeId }}">Wednesday</a></li>
+                    <li ><a href="/bookingController/viewBookings/{{ days[3] }}/{{ officeId }}">Thursday</a></li>
+                    <li><a href="/bookingController/viewBookings/{{ days[4] }}/{{ officeId }}">Friday</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Seat Number</th>
+            {% for cal in calendar %}
+                <th>{{ cal }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in 0..seatNumber %}
+            {% set j = i+1 %}
+            <tr>
+                <td> <button type="button" class="btn btn-lg btn-primary" ><a href="{{ url }}/{{ j }}">Seat {{ j }}</a></button>
+                </td>
+                {% for c in 0..calendar|length - 1 %}
+                    {% for key, value in seatAvailability[0][c] %}
+                       <td> {{ key }}</td>
+                    {% endfor %}
+                {% endfor %}
+
+
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock %}
