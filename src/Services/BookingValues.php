@@ -19,5 +19,20 @@ final class BookingValues
         '17:00' => '17:00'
     );
 
+    const TIMETABLE = array(
+        '08:00' => 'Free',
+        '09:00' => 'Free',
+        '10:00' => 'Free',
+        '11:00' => 'Free',
+        '12:00' => 'Free',
+        '13:00' => 'Free',
+        '14:00' => 'Free',
+        '15:00' => 'Free',
+        '16:00' => 'Free',
+        '17:00' => 'Free'
+    );
+
+    const TIMETABLE_TEXT = array('Free', 'Booked');
+
 
 }

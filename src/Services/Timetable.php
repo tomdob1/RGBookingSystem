@@ -32,21 +32,30 @@ class Timetable
         '16:00',
         '17:00',
     );
-    private $bookingValues = array('Free', 'Booked');
+    private $day;
 
-    public function __construct($officeId, BookTblRepository $repository){
+
+    public function __construct($officeId, $day, BookTblRepository $repository){
         $this->officeId = $officeId;
         $this->repository = $repository;
+        $this->day = $day;
     }
 
     public function getNoOfSeats(OfficeTbl $officeTbl): int{
         return $officeTbl->getOfficeSeats();
     }
 
-    public function seatAvailability($seatNumber, $date) : array
+    public function seatAvailability($seatNumber) : array
     {
-         $takenSeats = $this->convertSeatAvailability($this->repository->findTakenSeats($this->officeId, $date));
-         return $this->createTimetable($takenSeats, $seatNumber);
+        $takenSeats = $this->repository->findTakenSeats3($this->officeId, $this->day);
+        if($takenSeats){
+            $bookingTimes = $this->findBookingTimes($takenSeats);
+        }
+        else {
+            $bookingTimes = null;
+        }
+
+         return $this->createTimetable($bookingTimes, $seatNumber);
     }
 
     public function getDays():array{
@@ -57,28 +66,39 @@ class Timetable
         return $this->calendar;
     }
 
-    public function convertSeatAvailability($seatAvailability): array
+
+    private function findBookingTimes($seatIds) : array
     {
-        $takenSeats = array();
-        foreach ($seatAvailability as $seat) {
-            array_push($takenSeats, array($seat['bookingTime']));
+        $bookingTimes = array();
+        $i = 0;
+        foreach($seatIds as $seatId){
+            $time = array();
+            $i++;
+            $seatTimes = $this->repository->findSeatBookingTimes($seatId, $this->officeId, $this->day);
+            foreach($seatTimes as $seatTime){
+                $time = array_merge($time, array($seatTime['bookingTime'] => BookingValues::TIMETABLE_TEXT[1]));
+            }
+            $seatName = 'seat' . $i;
+            $bookingTimes = array_merge($bookingTimes, array($seatName => $time));
         }
-
-        return $takenSeats;
+        return $bookingTimes;
     }
 
-    private function createTimetable($takenSeats, $seatNumber): array{
+    private function createTimetable($takenSeats, $seatNumber):array{
         $availability = array();
-        for($i = 0; $i <= $seatNumber; $i++ ){
-            $seatAdd = array();
-           for($j = 0; $j < count($this->calendar); $j++){
-               ($this->calendar[$j] == $takenSeats) ? $booking = $this->bookingValues[1] : $booking = $this->bookingValues[0];
-                array_push($seatAdd, array($this->calendar[$j] => $booking));
-           }
-            $availability[$i] = $seatAdd;
+        $calendar = BookingValues::TIMETABLE;
+        for($i = 1; $i <= $seatNumber; $i++) {
+            $seatId = 'seat' . $i;
+            if(isset($takenSeats[$seatId])){
+                $test = array_replace($calendar, $takenSeats[$seatId]);
+            }
+            else {
+                $test = BookingValues::TIMETABLE;
+            }
+            array_push($availability, $test);
         }
-
-        return $availability;
+      return $availability;
     }
+
 
 }

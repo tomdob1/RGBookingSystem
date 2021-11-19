@@ -33,15 +33,13 @@
         </thead>
         <tbody>
         {% for i in 1..seatNumber %}
-
+            {% set seatNumberIndex = i-1 %}
             <tr>
-                <td> <button type="button" class="btn btn-lg btn-primary" ><a href="{{ url }}/{{ 1 }}">Seat {{ 1 }}</a></button>
+                <td> <button type="button" class="btn btn-lg btn-primary" ><a href="{{ url }}/{{ i }}">Seat {{ i }}</a></button>
                 </td>
-                {% for c in 0..calendar|length - 1 %}
-                    {% for key, value in seatAvailability[0][c] %}
+                    {% for key, value in seatAvailability[seatNumberIndex] %}
                        <td> {{ value }}</td>
                     {% endfor %}
-                {% endfor %}
 
 
             </tr>

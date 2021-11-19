@@ -106,11 +106,11 @@ class BookingController extends AbstractController {
      * @Route("/bookingController/viewBookings/{day}/{officeId}")
      */
     public function viewOfficeBookings($day, $officeId, BookTblRepository $bookTblRepository ){
-        $timeTable = new TimeTable($officeId, $bookTblRepository);
+        $timeTable = new TimeTable($officeId, $day, $bookTblRepository);
         $seatNumber = $this->getDoctrine()->getRepository(OfficeTbl::class)->find($officeId);
         $calendar = $timeTable->getTimeTable();
         $days     = $timeTable->getDays();
-        $seatAvailability = $timeTable->seatAvailability($seatNumber->getOfficeSeats(), $day);
+        $seatAvailability = $timeTable->seatAvailability($seatNumber->getOfficeSeats());
         return $this->renderForm('bookingTemplate.html.twig', [
             'seatNumber'        => $seatNumber->getOfficeSeats(),
             'seatAvailability'  => $seatAvailability,
@@ -133,7 +133,8 @@ class BookingController extends AbstractController {
         $form    = $this->createForm(BookingFormType::class, null, array('schedule' => $availability));
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $book->addBooking($form->get('bookingLength')->getData(), $officeId, $seatId, $day, $form->get('email')->getData(), $form->get('time')->getData());
+            ($availability['wholeDayAvailable']) ? $data = $form->get('bookingLength')->getData() : $data = null;
+            $book->addBooking( $officeId, $seatId, $day, $form->get('email')->getData(), $form->get('time')->getData(), $data);
             return $this->redirectToRoute('addOffice');
         }
 

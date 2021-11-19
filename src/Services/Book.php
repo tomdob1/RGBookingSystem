@@ -10,19 +10,18 @@ use Doctrine\ORM\EntityManagerInterface;
 class Book implements BookInterface
 {
     private $entityManager;
-    private $bookTbl;
     public function __construct(EntityManagerInterface $entityManager, BookTbl $bookTbl){
         $this->entityManager = $entityManager;
-        $this->bookTbl = $bookTbl;
     }
 
-    public function addBooking($data, $officeId, $seatId, $day, $employeeEmail, $time = null){
+    public function addBooking($officeId, $seatId, $day, $employeeEmail, $time = null, $data = 0){
         $employee = $this->entityManager->getRepository(EmployeeTbl::class)->find($employeeEmail);
         $employeeId = $employee->getId();
-        if ($data > 1) {
+
+        if ($data == 1) {
             $this->createWholeDayBooking($officeId, $seatId, $day, $employeeId);
         }
-        else if ($data == 1){
+        else if ($data == 0){
             $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time);
         }
     }
@@ -30,8 +29,7 @@ class Book implements BookInterface
     public function checkAvailability($officeId, $seatId, $day) : array
     {
         $booking = $this->entityManager->getRepository(BookTbl::class);
-        $takenSeats = $booking->findSeatAvailability($officeId, $day, $seatId);
-        $calendar = $this->compareToCalendar($takenSeats);
+        $calendar = $this->compareToCalendar($booking->findSeatAvailability($officeId, $day, $seatId));
         $wholeDayAvailability = $this->checkWholeDayAvailability($calendar);
         return array( 'schedule' => $calendar,
                       'wholeDayAvailable' => $wholeDayAvailability
@@ -41,15 +39,16 @@ class Book implements BookInterface
     private function compareToCalendar($takenSeats) : array
     {
         $calendar = BookingValues::CALENDAR;
-
+        $takenTimes = array();
         foreach($calendar as $cal){
             foreach($takenSeats as $seat){
-                if($seat == $cal){
-                    unset($cal[$seat]);
+                if($seat['bookingTime'] == $cal){
+                    array_push($takenTimes, $cal);
                 }
             }
+
         }
-        return $calendar;
+        return array_diff($calendar, $takenTimes);
     }
 
     private function checkWholeDayAvailability($calendar){
@@ -61,25 +60,23 @@ class Book implements BookInterface
         }
     }
 
-    private function createOneHourBooking($officeId, $seatId, $day, $employeeId, $time): bool {
-
-        $this->bookTbl->setOfficeId($officeId);
-        $this->bookTbl->setSeatNo($seatId);
-        $this->bookTbl->setBookingDate($day);
-        $this->bookTbl->setBookingTime($time);
-        $this->bookTbl->setEmployeeId($employeeId);
-        $this->entityManager->persist($this->bookTbl);
+    private function createOneHourBooking($officeId, $seatId, $day, $employeeId, $time, $bookTbl) {
+        $bookTbl->setOfficeId($officeId);
+        $bookTbl->setSeatNo($seatId);
+        $bookTbl->setBookingDate($day);
+        $bookTbl->setBookingTime($time);
+        $bookTbl->setEmployeeId($employeeId);
+        $this->entityManager->persist($bookTbl);
         $this->entityManager->flush();
-        return true;
     }
 
-    private function createWholeDayBooking($officeId, $seatId, $day, $employeeId): bool
+    private function createWholeDayBooking($officeId, $seatId, $day, $employeeId)
     {
-        $time = '08:00';
-        for ($i = 0; $i <= 8; $i++){
-            $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time);
+
+        foreach(BookingValues::CALENDAR as $time){
+            $bookTbl = new BookTbl();
+            $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time, $bookTbl);
         }
-        return true;
     }
 
 
