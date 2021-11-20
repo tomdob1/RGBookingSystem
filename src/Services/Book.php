@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 class Book implements BookInterface
 {
     private $entityManager;
-    public function __construct(EntityManagerInterface $entityManager, BookTbl $bookTbl){
+    public function __construct(EntityManagerInterface $entityManager){
         $this->entityManager = $entityManager;
     }
 
@@ -26,41 +26,8 @@ class Book implements BookInterface
         }
     }
 
-    public function checkAvailability($officeId, $seatId, $day) : array
-    {
-        $booking = $this->entityManager->getRepository(BookTbl::class);
-        $calendar = $this->compareToCalendar($booking->findSeatAvailability($officeId, $day, $seatId));
-        $wholeDayAvailability = $this->checkWholeDayAvailability($calendar);
-        return array( 'schedule' => $calendar,
-                      'wholeDayAvailable' => $wholeDayAvailability
-        );
-    }
-
-    private function compareToCalendar($takenSeats) : array
-    {
-        $calendar = BookingValues::CALENDAR;
-        $takenTimes = array();
-        foreach($calendar as $cal){
-            foreach($takenSeats as $seat){
-                if($seat['bookingTime'] == $cal){
-                    array_push($takenTimes, $cal);
-                }
-            }
-
-        }
-        return array_diff($calendar, $takenTimes);
-    }
-
-    private function checkWholeDayAvailability($calendar){
-        if (count(BookingValues::CALENDAR) == count($calendar)){
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    private function createOneHourBooking($officeId, $seatId, $day, $employeeId, $time, $bookTbl) {
+    private function createOneHourBooking($officeId, $seatId, $day, $employeeId, $time) {
+        $bookTbl = new BookTbl();
         $bookTbl->setOfficeId($officeId);
         $bookTbl->setSeatNo($seatId);
         $bookTbl->setBookingDate($day);
@@ -72,10 +39,8 @@ class Book implements BookInterface
 
     private function createWholeDayBooking($officeId, $seatId, $day, $employeeId)
     {
-
         foreach(BookingValues::CALENDAR as $time){
-            $bookTbl = new BookTbl();
-            $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time, $bookTbl);
+            $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time);
         }
     }
 

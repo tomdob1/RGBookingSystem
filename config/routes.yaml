@@ -9,3 +9,11 @@ addEmployee:
 addOffice:
       path: /bookingController/addOffice
       controller: App\Controller\BookingController::addOffice
+
+booking:
+      path: /bookingController/bookSeat/{day}/{officeId}
+      defaults: {controller: App\Controller\BookingController::bookSeatOffice, day: null, officeId: null}
+      requirements:
+            day: .*
+            officeId: .*
+

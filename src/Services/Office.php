@@ -4,9 +4,10 @@
 namespace App\Services;
 
 use App\Entity\OfficeTbl;
+use App\Interfaces\OfficesInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class Office
+class Office implements OfficesInterface
 {
 
     /**
@@ -19,18 +20,15 @@ class Office
         $this->entityManager = $entityManager;
     }
 
-    public function loopOffices($officeNumber, $seats): bool {
+    public function addOffices($officeNumber, $seat): void {
         for($i = 0; $i < $officeNumber; $i++){
-            $this->addOffice($seats);
+            $this->saveOffice($seat);
         }
-
-
-        return true;
     }
 
-    private function addOffice($seats): void  {
+    public function saveOffice($seat): void  {
         $officeTable = new OfficeTbl();
-        $officeTable->setOfficeSeats($seats);
+        $officeTable->setOfficeSeats($seat);
         $this->entityManager->persist($officeTable);
         $this->entityManager->flush();
     }

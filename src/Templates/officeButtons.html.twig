@@ -1,11 +1,33 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-    {% for tableResult in tableResults %}
-    <div>
-        <button type="button" class="btn btn-lg btn-primary" ><a href="{{url}}/{{ tableResult.getId() }}">Office {{ tableResult.getId() }}</a></button>
-    </div>
-
-
-    {% endfor %}
+    {% if not tableResults %}
+        No offices added. Please add an office.
+        <div>
+            <a class="btn btn-lg btn-primary" href="../addOffice"> Add Office</a>
+        </div>
+    {% elseif not employees %}
+        No employees added. Please add an Employee to continue.
+        <div>
+            <a class="btn btn-lg btn-primary" href="../addEmployee"> Add Employee</a>
+        </div>
+    {%  else %}
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Select an office</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tableResult in tableResults %}
+                <tr>
+                    <td><div class="mt-2 col-md-6" style="margin: 20px;">
+                            <a class="btn btn-lg btn-primary" href="{{url}}/{{ tableResult.getId() }}">Office {{ tableResult.getId() }}</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {%  endif %}
 {% endblock %}

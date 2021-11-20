@@ -9,8 +9,8 @@ use Doctrine\ORM\EntityManagerInterface;
 
 interface OfficesInterface
 {
-    public function loopOffices($officeNumber, $seat): bool;
+    public function addOffices($officeNumber, $seat): void;
 
-    public function addOffice($seats, OfficeTbl $officeTable, EntityManagerInterface $entityManager) : bool;
+    public function saveOffice($seat) : void;
 
 }

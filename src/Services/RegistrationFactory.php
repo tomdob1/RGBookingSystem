@@ -6,17 +6,23 @@ namespace App\Services;
 
 use App\Entity\EmployeeTbl;
 use App\Entity\OfficeTbl;
+use App\Interfaces\RegistrationFactoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
-
 class RegistrationFactory implements RegistrationFactoryInterface
 {
+    public $entityManager;
 
-    public function createEmployee($entityManager, EmployeeTbl $employeeTbl ): Employee {
-        return new Employee($entityManager, $employeeTbl);
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
     }
 
-    public function createOffice( $entityManager, OfficeTbl $officeTbl): Office {
-        return new Office($entityManager);
+    public function createEmployee(EmployeeTbl $employeeTbl ): Employee {
+        return new Employee($this->entityManager, $employeeTbl);
+    }
+
+    public function createOffice( OfficeTbl $officeTbl): Office {
+        return new Office($this->entityManager);
     }
 
 

@@ -3,37 +3,13 @@
 
 namespace App\Services;
 
-
-use App\Entity\OfficeTbl;
-
 use App\Repository\BookTblRepository;
-use Doctrine\Persistence\ObjectRepository;
 
 class Timetable
 {
-    private $officeId;
+    public $officeId;
     public $repository;
-    private $dayTimetable = array(
-        'dateBegin' => '08:00',
-        'dateEnd'   => '17:00'
-    );
-    private $days = array(
-        'monday', 'tuesday', 'wednesday', 'thursday', 'friday'
-    );
-    private $calendar = array(
-        '08:00',
-        '09:00',
-        '10:00',
-        '11:00',
-        '12:00',
-        '13:00',
-        '14:00',
-        '15:00',
-        '16:00',
-        '17:00',
-    );
-    private $day;
-
+    public $day;
 
     public function __construct($officeId, $day, BookTblRepository $repository){
         $this->officeId = $officeId;
@@ -41,13 +17,9 @@ class Timetable
         $this->day = $day;
     }
 
-    public function getNoOfSeats(OfficeTbl $officeTbl): int{
-        return $officeTbl->getOfficeSeats();
-    }
-
-    public function seatAvailability($seatNumber) : array
+    public function getTimetable($seatNumber) : array
     {
-        $takenSeats = $this->repository->findTakenSeats3($this->officeId, $this->day);
+        $takenSeats = $this->repository->findTakenSeats($this->officeId, $this->day);
         if($takenSeats){
             $bookingTimes = $this->findBookingTimes($takenSeats);
         }
@@ -58,12 +30,21 @@ class Timetable
          return $this->createTimetable($bookingTimes, $seatNumber);
     }
 
-    public function getDays():array{
-        return $this->days;
+    public function fullyBooked($availability): array{
+        $fullyBookedArray = array();
+        foreach($availability as $av){
+           array_push($fullyBookedArray, $this->checkForBookedValue($av));
+        }
+        return $fullyBookedArray;
     }
 
-    public function getTimeTable(): array{
-        return $this->calendar;
+    private function checkForBookedValue($seatAvailability): string {
+        foreach($seatAvailability as $availability){
+            if($availability == BookingValues::TIMETABLE_TEXT[0]){
+                return BookingValues::TIMETABLE_TEXT[0];
+            }
+        }
+        return BookingValues::TIMETABLE_TEXT[1];
     }
 
 
@@ -78,7 +59,7 @@ class Timetable
             foreach($seatTimes as $seatTime){
                 $time = array_merge($time, array($seatTime['bookingTime'] => BookingValues::TIMETABLE_TEXT[1]));
             }
-            $seatName = 'seat' . $i;
+            $seatName = 'seat' . $seatId['seatNo'];
             $bookingTimes = array_merge($bookingTimes, array($seatName => $time));
         }
         return $bookingTimes;
@@ -90,12 +71,12 @@ class Timetable
         for($i = 1; $i <= $seatNumber; $i++) {
             $seatId = 'seat' . $i;
             if(isset($takenSeats[$seatId])){
-                $test = array_replace($calendar, $takenSeats[$seatId]);
+                $replacedArray = array_replace($calendar, $takenSeats[$seatId]);
             }
             else {
-                $test = BookingValues::TIMETABLE;
+                $replacedArray = BookingValues::TIMETABLE;
             }
-            array_push($availability, $test);
+            array_push($availability, $replacedArray);
         }
       return $availability;
     }

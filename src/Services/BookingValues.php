@@ -34,5 +34,14 @@ final class BookingValues
 
     const TIMETABLE_TEXT = array('Free', 'Booked');
 
+    const DAY_TIMETABLE = array(
+        'dateBegin' => '08:00',
+        'dateEnd'   => '17:00'
+    );
+
+    const WORKING_DAYS = array(
+        'monday', 'tuesday', 'wednesday', 'thursday', 'friday'
+    );
+
 
 }

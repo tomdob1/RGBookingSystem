@@ -13,15 +13,17 @@
             </div>
             <div class="navbar-collapse collapse ">
                 <ul class="nav navbar-nav ">
-                    <li class=""><a href="/bookingController/viewBookings/{{ days[0] }}/{{ officeId }}">Monday</a></li>
-                    <li><a href="/bookingController/viewBookings/{{ days[1] }}/{{ officeId }}">Tuesday</a></li>
-                    <li><a href="/bookingController/viewBookings/{{ days[2] }}/{{ officeId }}">Wednesday</a></li>
-                    <li ><a href="/bookingController/viewBookings/{{ days[3] }}/{{ officeId }}">Thursday</a></li>
-                    <li><a href="/bookingController/viewBookings/{{ days[4] }}/{{ officeId }}">Friday</a></li>
+                    <li {% if day == 'monday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[0] }}/{{ officeId }}">Monday</a></li>
+                    <li {% if day == 'tuesday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[1] }}/{{ officeId }}">Tuesday</a></li>
+                    <li {% if day == 'wednesday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[2] }}/{{ officeId }}">Wednesday</a></li>
+                    <li {% if day == 'thursday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[3] }}/{{ officeId }}">Thursday</a></li>
+                    <li {% if day == 'friday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[4] }}/{{ officeId }}">Friday</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
+
     </nav>
+    <h1>Office {{ officeId }} - {{ day }}</h1>
     <table class="table">
         <thead>
         <tr>
@@ -35,11 +37,17 @@
         {% for i in 1..seatNumber %}
             {% set seatNumberIndex = i-1 %}
             <tr>
-                <td> <button type="button" class="btn btn-lg btn-primary" ><a href="{{ url }}/{{ i }}">Seat {{ i }}</a></button>
+                <td>
+                    {% if fullyBooked[seatNumberIndex] == 'Booked' %}
+                        <button class="btn btn-lg btn-danger" style="pointer-events: none;">Seat {{ i }} Fully Booked</button>
+                    {% else %}
+                        <a class="btn btn-lg btn-primary" href="{{ url }}/{{ i }}">Book Seat {{ i }}</a>
+                    {% endif %}
+
                 </td>
-                    {% for key, value in seatAvailability[seatNumberIndex] %}
-                       <td> {{ value }}</td>
-                    {% endfor %}
+                {% for key, value in seatAvailability[seatNumberIndex] %}
+                    <td> {{ value }}</td>
+                {% endfor %}
 
 
             </tr>

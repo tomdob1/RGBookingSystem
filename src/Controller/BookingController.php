@@ -7,11 +7,9 @@ use App\Entity\BookTbl;
 use App\Form\BookingFormType;
 use App\Form\OfficeFormType;
 use App\Repository\BookTblRepository;
-use App\Repository\OfficeTblRepository;
+use App\Services\Availability;
 use App\Services\Book;
 use App\Services\BookingValues;
-use App\Services\Employee;
-use App\Services\Office;
 use App\Services\RegistrationFactory;
 use App\Entity\EmployeeTbl;
 use App\Entity\OfficeTbl;
@@ -23,7 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Config\Doctrine\Orm\EntityManagerConfig;
+
 
 class BookingController extends AbstractController {
     /**
@@ -36,24 +34,21 @@ class BookingController extends AbstractController {
 
     /**
      * @Route("/bookingController/addEmployee" );
+     * Route to generate the add employee page. If a request is submitted to add an employee, the employee is created through the registration factory (abstract factory design principle)
      */
-    public function addEmployee(Request $request):Response
+    public function addEmployee(Request $request, EntityManagerInterface $entityManager):Response
     {
-        $employee = new EmployeeTbl();
-        $form = $this->createForm(EmployeeFormType::class, $employee);
+        $employeeTbl = new EmployeeTbl();
+        $form = $this->createForm(EmployeeFormType::class);
         $form->handleRequest($request);
-        $entityManager = $this->getDoctrine()->getManager();
         if ($form->isSubmitted() && $form->isValid()) {
-            $task = $form->getData();
-            $registrationFactory = new RegistrationFactory();
-            $test = $registrationFactory->createEmployee($entityManager, $employee);
-            $test->addEmployeeToSystem($task);
-
+            $registrationFactory = new RegistrationFactory($entityManager);
+            $employee = $registrationFactory->createEmployee($employeeTbl);
+            $employee->addEmployeeToSystem($form->getData());
             return $this->redirectToRoute('addEmployee');
         }
 
-        $table = new Table($entityManager);
-        $tableResults = $table->getAllRecords(EmployeeTbl::class);
+        $tableResults = $entityManager->getRepository(EmployeeTbl::class)->findAll();
         return $this->renderForm('addEmployee.html.twig', [
             'form' => $form,
             'tableResults'=> $tableResults
@@ -63,88 +58,78 @@ class BookingController extends AbstractController {
     /**
      * @Route("/bookingController/addOffice");
      */
-    public function addOffice(Request $request): Response
+    public function addOffice(Request $request, EntityManagerInterface $entityManager): Response
     {
         $office = new OfficeTbl();
         $form = $this->createForm(OfficeFormType::class, $office);
-        $entityManager = $this->getDoctrine()->getManager();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $task                = $form->getData();
-            $registrationFactory = new RegistrationFactory();
-            $entityManager       = $this->getDoctrine()->getManager();
-            $test                = $registrationFactory->createOffice($entityManager, $office);
-            $test->loopOffices( $form->get('noOfOffices')->getData(), $form->get('officeSeats')->getData());
-            //TODO get rid of hard code
+            $registrationFactory = new RegistrationFactory($entityManager);
+            $office              = $registrationFactory->createOffice($office);
+            $office->addOffices($form->get('noOfOffices')->getData(), $form->get('officeSeats')->getData());
             return $this->redirectToRoute('addOffice');
         }
-        $table = new Table($entityManager);
-        $tableResults = $table->getAllRecords(OfficeTbl::class);
+        $tableResults = $entityManager->getRepository(OfficeTbl::class)->findAll();
         return $this->renderForm('addOffice.html.twig', [
             'form'          => $form,
             'tableResults'  => $tableResults
         ]);
-
     }
 
-
-
     /**
-     * @Route("/bookingController/viewBookings/")
+     * @Route("/bookingController/bookSeat")
      */
-    public function viewBookings(){
-        $entityManager = $this->getDoctrine()->getManager();
-        $table = new Table($entityManager);
-        $tableResults = $table->getAllRecords(OfficeTbl::class);
+    public function bookSeat(EntityManagerInterface $entityManager): Response
+    {
+        $employees = $entityManager->getRepository(EmployeeTbl::class)->findAll();
+        $tableResults = $entityManager->getRepository(OfficeTbl::class)->findAll();
             return $this->renderForm('officeButtons.html.twig', [
             'tableResults'  => $tableResults,
-            'url'           => $_SERVER['REQUEST_URI'] . 'monday'
+            'url'           => $_SERVER['REQUEST_URI'] . '/monday',
+            'employees'     => $employees
         ]);
     }
 
     /**
-     * @Route("/bookingController/viewBookings/{day}/{officeId}")
+     * @Route("/bookingController/bookSeat/{day}/{officeId}")
      */
-    public function viewOfficeBookings($day, $officeId, BookTblRepository $bookTblRepository ){
-        $timeTable = new TimeTable($officeId, $day, $bookTblRepository);
-        $seatNumber = $this->getDoctrine()->getRepository(OfficeTbl::class)->find($officeId);
-        $calendar = $timeTable->getTimeTable();
-        $days     = $timeTable->getDays();
-        $seatAvailability = $timeTable->seatAvailability($seatNumber->getOfficeSeats());
+    public function bookSeatOffice($day, $officeId, BookTblRepository $bookTblRepository): Response
+    {
+        $timeTable        = new TimeTable($officeId, $day, $bookTblRepository);
+        $seatNumber       = $this->getDoctrine()->getRepository(OfficeTbl::class)->find($officeId);
+        $seatAvailability = $timeTable->getTimetable($seatNumber->getOfficeSeats());
+        $fullyBooked      = $timeTable->fullyBooked($seatAvailability);
         return $this->renderForm('bookingTemplate.html.twig', [
             'seatNumber'        => $seatNumber->getOfficeSeats(),
             'seatAvailability'  => $seatAvailability,
-            'calendar'          => $calendar,
+            'calendar'          => BookingValues::CALENDAR,
             'url'               => $_SERVER['REQUEST_URI'],
-            'baseUrl'           => $_SERVER['SERVER_NAME'],
-            'days'              => $days,
+            'fullyBooked'       => $fullyBooked,
+            'days'              => BookingValues::WORKING_DAYS,
+            'day'               => $day,
             'officeId'          => $officeId
         ]);
     }
 
     /**
-     * @Route("/bookingController/viewBookings/{day}/{officeId}/{seatId}")
+     * @Route("/bookingController/bookSeat/{day}/{officeId}/{seatId}")
      */
-    public function makeBooking($day, $officeId, $seatId,  Request $request, EntityManagerInterface $entityManager):response {
-        $bookTbl = new BookTbl();
-        $book    = new Book($entityManager, $bookTbl);
-        $availability = $book->checkAvailability($officeId, $seatId, $day);
-
-        $form    = $this->createForm(BookingFormType::class, null, array('schedule' => $availability));
+    public function bookSeatMakeBooking($day, $officeId, $seatId,  Request $request, EntityManagerInterface $entityManager, BookTblRepository $bookTblRepository):response {
+        $book           = new Book($entityManager);
+        $availability   = new Availability($bookTblRepository);
+        $availableTimes = $availability->checkAvailability($officeId, $seatId, $day);
+        $form           = $this->createForm(BookingFormType::class, null, array('schedule' => $availableTimes));
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            ($availability['wholeDayAvailable']) ? $data = $form->get('bookingLength')->getData() : $data = null;
-            $book->addBooking( $officeId, $seatId, $day, $form->get('email')->getData(), $form->get('time')->getData(), $data);
-            return $this->redirectToRoute('addOffice');
+            ($availableTimes['wholeDayAvailable']) ? $data = $form->get('bookingLength')->getData() : $data = null;
+            $book->addBooking($officeId, $seatId, $day, $form->get('email')->getData(), $form->get('time')->getData(), $data);
+            return $this->redirectToRoute('booking', array('day' => $day, 'officeId' => $officeId));
         }
-
-        $table   = new Table($entityManager);
-        $tableResults = $table->getAllRecords(OfficeTbl::class);
+        $tableResults = $entityManager->getRepository(OfficeTbl::class)->findAll();
         return $this->renderForm('bookSeat.html.twig', [
             'form'          => $form,
             'tableResults'  => $tableResults
         ]);
-
     }
 
 
