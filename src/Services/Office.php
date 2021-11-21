@@ -13,10 +13,11 @@ class Office implements OfficesInterface
     /**
      * @var EntityManagerInterface
      */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
+    private OfficeTbl $officeTbl;
 
-    public function __construct(EntityManagerInterface $entityManager){
-
+    public function __construct(EntityManagerInterface $entityManager, OfficeTbl $officeTbl){
+        $this->officeTbl     = $officeTbl;
         $this->entityManager = $entityManager;
     }
 
@@ -27,9 +28,8 @@ class Office implements OfficesInterface
     }
 
     public function saveOffice($seat): void  {
-        $officeTable = new OfficeTbl();
-        $officeTable->setOfficeSeats($seat);
-        $this->entityManager->persist($officeTable);
+        $this->officeTbl->setOfficeSeats($seat);
+        $this->entityManager->persist($this->officeTbl);
         $this->entityManager->flush();
     }
 

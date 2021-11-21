@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class Book implements BookInterface
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     public function __construct(EntityManagerInterface $entityManager){
         $this->entityManager = $entityManager;
     }
@@ -18,12 +18,12 @@ class Book implements BookInterface
         $employee = $this->entityManager->getRepository(EmployeeTbl::class)->find($employeeEmail);
         $employeeId = $employee->getId();
 
-        if ($data == 1) {
-            $this->createWholeDayBooking($officeId, $seatId, $day, $employeeId);
-        }
-        else if ($data == 0){
-            $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time);
-        }
+            if ($data == 1) {
+                $this->createWholeDayBooking($officeId, $seatId, $day, $employeeId);
+            }
+            else if ($data == 0){
+                $this->createOneHourBooking($officeId, $seatId, $day, $employeeId, $time);
+            }
     }
 
     private function createOneHourBooking($officeId, $seatId, $day, $employeeId, $time) {

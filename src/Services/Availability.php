@@ -5,20 +5,22 @@ namespace App\Services;
 
 use App\Interfaces\AvailabilityInterface;
 use App\Repository\BookTblRepository;
+use Exception;
+use JetBrains\PhpStorm\ArrayShape;
 
 class Availability implements AvailabilityInterface
 {
-    private $bookTblRepository;
+    private BookTblRepository $bookTblRepository;
     public function __construct(BookTblRepository $bookTblRepository){
         $this->bookTblRepository = $bookTblRepository;
     }
 
-    public function checkAvailability($officeId, $seatId, $day) : array
+    #[ArrayShape(['schedule' => "array", 'wholeDayAvailable' => "bool"])] public function checkAvailability($officeId, $seatId, $day) : array
     {
         $calendar = $this->compareToCalendar($this->bookTblRepository->findSeatBookingTimes($seatId, $officeId, $day));
         $wholeDayAvailability = $this->checkWholeDayAvailability($calendar);
-        return array( 'schedule' => $calendar,
-            'wholeDayAvailable' => $wholeDayAvailability
+        return array(BookingValues::RETURNED_TIMETABLE_ARRAY_KEYS[0] => $calendar,
+                     BookingValues::RETURNED_TIMETABLE_ARRAY_KEYS[1] => $wholeDayAvailability
         );
     }
 
@@ -28,11 +30,15 @@ class Availability implements AvailabilityInterface
         $takenTimes = array();
         foreach($calendar as $cal){
             foreach($takenSeats as $seat){
-                if($seat['bookingTime'] == $cal){
-                    array_push($takenTimes, $cal);
+                try {
+                    if($seat['bookingTime'] == $cal){
+                        array_push($takenTimes, $cal);
+                    }
+                } catch (exception $ex){
+                    error_log($ex->getMessage());
                 }
-            }
 
+            }
         }
         return array_diff($calendar, $takenTimes);
     }

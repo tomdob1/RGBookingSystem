@@ -43,5 +43,5 @@ final class BookingValues
         'monday', 'tuesday', 'wednesday', 'thursday', 'friday'
     );
 
-
+    const RETURNED_TIMETABLE_ARRAY_KEYS = array('schedule', 'wholeDayAvailable');
 }

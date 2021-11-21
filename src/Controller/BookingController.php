@@ -3,7 +3,6 @@
 
 namespace App\Controller;
 
-use App\Entity\BookTbl;
 use App\Form\BookingFormType;
 use App\Form\OfficeFormType;
 use App\Repository\BookTblRepository;
@@ -14,7 +13,6 @@ use App\Services\RegistrationFactory;
 use App\Entity\EmployeeTbl;
 use App\Entity\OfficeTbl;
 use App\Form\EmployeeFormType;
-use App\Services\Table;
 use App\Services\Timetable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -125,10 +123,8 @@ class BookingController extends AbstractController {
             $book->addBooking($officeId, $seatId, $day, $form->get('email')->getData(), $form->get('time')->getData(), $data);
             return $this->redirectToRoute('booking', array('day' => $day, 'officeId' => $officeId));
         }
-        $tableResults = $entityManager->getRepository(OfficeTbl::class)->findAll();
         return $this->renderForm('bookSeat.html.twig', [
-            'form'          => $form,
-            'tableResults'  => $tableResults
+            'form'          => $form
         ]);
     }
 
