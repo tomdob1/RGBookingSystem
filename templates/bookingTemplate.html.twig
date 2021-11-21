@@ -1,6 +1,12 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    <!-- displays the timetable for a specific day -->
     <nav class="navbar navbar-default">
         <div class="container">
             <div class="navbar-header">
@@ -13,17 +19,17 @@
             </div>
             <div class="navbar-collapse collapse ">
                 <ul class="nav navbar-nav ">
-                    <li {% if day == 'monday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[0] }}/{{ officeId }}">Monday</a></li>
-                    <li {% if day == 'tuesday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[1] }}/{{ officeId }}">Tuesday</a></li>
-                    <li {% if day == 'wednesday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[2] }}/{{ officeId }}">Wednesday</a></li>
-                    <li {% if day == 'thursday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[3] }}/{{ officeId }}">Thursday</a></li>
-                    <li {% if day == 'friday' %} class="active" {% endif %}><a href="/bookingController/bookSeat/{{ days[4] }}/{{ officeId }}">Friday</a></li>
+                    <li {% if day == 'monday' %} class="active" {% endif %}><a href="/bookSeat/{{ days[0] }}/{{ officeId }}">Monday</a></li>
+                    <li {% if day == 'tuesday' %} class="active" {% endif %}><a href="/bookSeat/{{ days[1] }}/{{ officeId }}">Tuesday</a></li>
+                    <li {% if day == 'wednesday' %} class="active" {% endif %}><a href="/bookSeat/{{ days[2] }}/{{ officeId }}">Wednesday</a></li>
+                    <li {% if day == 'thursday' %} class="active" {% endif %}><a href="/bookSeat/{{ days[3] }}/{{ officeId }}">Thursday</a></li>
+                    <li {% if day == 'friday' %} class="active" {% endif %}><a href="/bookSeat/{{ days[4] }}/{{ officeId }}">Friday</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
 
     </nav>
-    <h1>Office {{ officeId }} - {{ day }}</h1>
+    <h1>Office {{ officeId }} - {{ day|capitalize }}</h1>
     <table class="table">
         <thead>
         <tr>

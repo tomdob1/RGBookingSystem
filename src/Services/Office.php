@@ -10,26 +10,38 @@ use Doctrine\ORM\EntityManagerInterface;
 class Office implements OfficesInterface
 {
 
-    /**
-     * @var EntityManagerInterface
-     */
     private EntityManagerInterface $entityManager;
-    private OfficeTbl $officeTbl;
 
-    public function __construct(EntityManagerInterface $entityManager, OfficeTbl $officeTbl){
-        $this->officeTbl     = $officeTbl;
+    /**
+     * Office constructor.
+     * @param EntityManagerInterface $entityManager
+     * @param OfficeTbl $officeTbl
+     */
+    public function __construct(EntityManagerInterface $entityManager){
         $this->entityManager = $entityManager;
     }
 
+
+
+    /**
+     * @param $officeNumber
+     * @param $seat
+     * checks to see how many offices were added and loops through the save office function
+     */
     public function addOffices($officeNumber, $seat): void {
         for($i = 0; $i < $officeNumber; $i++){
             $this->saveOffice($seat);
         }
     }
 
+    /**
+     * @param $seat
+     * Saves an office with the specified number of seats
+     */
     public function saveOffice($seat): void  {
-        $this->officeTbl->setOfficeSeats($seat);
-        $this->entityManager->persist($this->officeTbl);
+        $officeTbl = new OfficeTbl();
+        $officeTbl->setOfficeSeats($seat);
+        $this->entityManager->persist($officeTbl);
         $this->entityManager->flush();
     }
 

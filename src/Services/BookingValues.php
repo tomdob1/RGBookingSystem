@@ -4,7 +4,7 @@
 namespace App\Services;
 
 
-final class BookingValues
+final class BookingValues //file to store constants
 {
     const CALENDAR = array(
         '08:00' => '08:00',

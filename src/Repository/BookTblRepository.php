@@ -19,6 +19,13 @@ class BookTblRepository extends ServiceEntityRepository
         parent::__construct($registry, BookTbl::class);
     }
 
+
+    /**
+     * @param $officeId
+     * @param $day
+     * @return int|mixed|string
+     * returns the list of seats which have a booking for a specific office and day
+     */
     public function findTakenSeats($officeId, $day){
         $entityManager = $this->getEntityManager();
         $qb = $entityManager->createQueryBuilder();
@@ -34,6 +41,13 @@ class BookTblRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
+    /**
+     * @param $seatId
+     * @param $officeId
+     * @param $day
+     * @return int|mixed|string
+     * returns a list of booking times for a specific seat and office on a particular day
+     */
     public function findSeatBookingTimes($seatId, $officeId, $day){
         $entityManager = $this->getEntityManager();
         $qb = $entityManager->createQueryBuilder();

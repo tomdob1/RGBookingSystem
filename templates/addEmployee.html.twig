@@ -1,7 +1,12 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-
+    <!-- displays the form to add an employee -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
 {{ form(form) }}
 
     <table class="table table-bordered">
@@ -14,7 +19,7 @@
         </tr>
         </thead>
         <tbody>
-
+        <!-- displays a table of the current employees -->
         {% for tableResult in tableResults %}
             <tr>
                 <td>{{ tableResult.getFirstName() }} </td>

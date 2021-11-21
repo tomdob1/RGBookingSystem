@@ -11,45 +11,35 @@ use PHPUnit\Util\Test;
 
 class TimetableTest extends \PHPUnit\Framework\TestCase
 {
-    public function mockBookTblRepository(): BookTblRepository|\PHPUnit\Framework\MockObject\MockObject
+    public function mockBookTblRepository($response): BookTblRepository|\PHPUnit\Framework\MockObject\MockObject
     {
-        return $repository = $this->getMockBuilder(BookTblRepository::class)->disableOriginalConstructor()->getMock();
-    }
-
-    public function testGetTimetableWithTakenSeats(){
-        $repository = $this->mockBookTblRepository();
+        $repository = $this->getMockBuilder(BookTblRepository::class)->disableOriginalConstructor()->getMock();
         $repository->expects($this->any())
             ->method('findTakenSeats')
-            ->willReturn(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
+            ->willReturn($response);
 
         $repository->expects($this->any())
             ->method('findSeatBookingTimes')
-            ->willReturn(array(array('bookingTime' => '08:00')));
+            ->willReturn(array(TestValues::CORRECT_BOOK_TIMES_REPOSITORY_RESPONSE));
 
+        return $repository;
+    }
+
+    public function testGetTimetableWithTakenSeats(){
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
-
         self::assertIsArray($timetable->getTimetable(TestValues::SEAT_NO), 'testGetTimetableWithTakenSeats does not return an array');
     }
 
     public function testGetTimetableWithNoTakenSeats(){
-        $repository = $this->mockBookTblRepository();
-        $repository->expects($this->any())
-            ->method('findTakenSeats')
-            ->willReturn(null);
+        $repository = $this->mockBookTblRepository(null);
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
 
         self::assertIsArray($timetable->getTimetable(TestValues::SEAT_NO), 'testGetTimetableWithNoTakenSeats does not return an array');
     }
 
     public function testTimetableTimesMatch(){
-        $repository = $this->mockBookTblRepository();
-        $repository->expects($this->any())
-            ->method('findTakenSeats')
-            ->willReturn(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
-
-        $repository->expects($this->any())
-            ->method('findSeatBookingTimes')
-            ->willReturn(array(TestValues::CORRECT_BOOK_TIMES_REPOSITORY_RESPONSE));
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
 
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->getTimetable(TestValues::SEAT_NO);
@@ -59,14 +49,7 @@ class TimetableTest extends \PHPUnit\Framework\TestCase
     }
 
     public function testTimeTableContainsFree(){
-        $repository = $this->mockBookTblRepository();
-        $repository->expects($this->any())
-            ->method('findTakenSeats')
-            ->willReturn(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
-
-        $repository->expects($this->any())
-            ->method('findSeatBookingTimes')
-            ->willReturn(array(TestValues::CORRECT_BOOK_TIMES_REPOSITORY_RESPONSE));
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
 
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->getTimetable(TestValues::SEAT_NO);
@@ -74,14 +57,7 @@ class TimetableTest extends \PHPUnit\Framework\TestCase
     }
 
     public function testTimeTableContainsBooked(){
-        $repository = $this->mockBookTblRepository();
-        $repository->expects($this->any())
-            ->method('findTakenSeats')
-            ->willReturn(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
-
-        $repository->expects($this->any())
-            ->method('findSeatBookingTimes')
-            ->willReturn(array(TestValues::CORRECT_BOOK_TIMES_REPOSITORY_RESPONSE));
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
 
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->getTimetable(TestValues::SEAT_NO);
@@ -89,28 +65,28 @@ class TimetableTest extends \PHPUnit\Framework\TestCase
     }
 
     public function testFullyBookedFreeAvailability(){
-        $repository = $this->mockBookTblRepository();
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->fullyBooked(array(BookingValues::TIMETABLE));
         self::assertEquals(BookingValues::TIMETABLE_TEXT[0], $result[0], 'testFullyBookedFreeAvailability is not completely free when expected to be');
     }
 
     public function testFullyBookedNotFreeAvailability(){
-        $repository = $this->mockBookTblRepository();
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->fullyBooked(array(TestValues::NOT_FREE_AVAILABILITY));
         self::assertEquals(BookingValues::TIMETABLE_TEXT[1], $result[0], 'testFullyBookedFreeAvailability is display free when it should not be');
     }
 
     public function testFullyBookedOneFreeAvailability(){
-        $repository = $this->mockBookTblRepository();
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->fullyBooked(array(TestValues::ONE_FREE_AVAILABILITY));
         self::assertEquals(BookingValues::TIMETABLE_TEXT[0], $result[0], 'testFullyBookedOneFreeAvailability should display free although it does not');
     }
 
     public function testFullyBookedReturnsArray(){
-        $repository = $this->mockBookTblRepository();
+        $repository = $this->mockBookTblRepository(array(TestValues::CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE));
         $timetable = new Timetable(TestValues::OFFICE_ID, BookingValues::WORKING_DAYS[0], $repository);
         $result    = $timetable->fullyBooked(array(TestValues::ONE_FREE_AVAILABILITY));
         self::assertIsArray($result, 'testFullyBookedReturnsArray is not an array');

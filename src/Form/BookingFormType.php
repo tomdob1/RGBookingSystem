@@ -2,18 +2,10 @@
 
 namespace App\Form;
 
-use App\Entity\BookTbl;
 use App\Entity\EmployeeTbl;
-use App\Form\Model\SeatBookingFormModel;
-
-use App\Repository\EmployeeTblRepository;
-use App\Services\BookingValues;
-use App\Services\Employee;
-use Doctrine\DBAL\Types\IntegerType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -21,13 +13,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class BookingFormType extends AbstractType
 {
 
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array $options
+     * form to build the booking page. Which displays radio buttons to select an hour or day - only if a whole day is available
+     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $schedule = $options['schedule']['schedule'];
-        $wholeDay = $options['schedule']['wholeDayAvailable'];
-        $bookingValue = new BookingValues();
+        $schedule = $options['schedule']['schedule']; //schedule
+        $wholeDay = $options['schedule']['wholeDayAvailable']; //boolean of whether the whole day is available
 
-        if(!$wholeDay){
+        if(!$wholeDay){ //if the whole day is not available - disable the 'Whole Day' option
             $builder->add('bookingLength', ChoiceType::class, [
                 'choices' => [
                     'Whole Day' => 1,
@@ -40,11 +36,14 @@ class BookingFormType extends AbstractType
                 'help'     => 'Full day not available to book'
             ]);
         }
-        else{
+        else{ //otherwise build with the option to select both radio buttons
             $builder->add('bookingLength', ChoiceType::class, [
                 'choices' => [
                     'Whole Day' => 1,
                     'One Hour' => 0
+                ],
+                'row_attr' => [
+                    'class' => 'day-input'
                 ],
                 'data' => 0,
                 'expanded' => true,
@@ -59,11 +58,12 @@ class BookingFormType extends AbstractType
             ])
             ->add('time', ChoiceType::class, [
                 'choices' => $schedule,
-                'attr' => array('class'=>'time-input')
+                'row_attr' => [
+                    'class' => 'time-input'
+                ],
 
             ])
             ->add('submit', SubmitType::class);
-
 
     }
 

@@ -11,6 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class OfficeFormType extends AbstractType
 {
+    //builds a form to add an office
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder

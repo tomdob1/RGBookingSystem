@@ -6,16 +6,13 @@ namespace App\Tests;
 
 use App\Services\BookingValues;
 
-class TestValues
+class TestValues //consts used for testing
 {
     const OFFICE_ID = 1;
-    const EMPLOYEE_ID = 1;
     const SEAT_NO = 1;
     const CORRECT_BOOK_TIMES_REPOSITORY_RESPONSE = array('bookingTime' => '08:00');
-    const INCORRECT_BOOK_TIMES_REPOSITORY_RESPONSE = array('seatNo' => 1);
     const TIME = '08:00';
     const CORRECT_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE = array('seatNo' => '1');
-    const NULL_TAKEN_SEATS_BOOK_REPOSITORY_RESPONSE = null;
     const NOT_FREE_AVAILABILITY = array(
     '08:00' => 'Booked',
     '09:00' => 'Booked',

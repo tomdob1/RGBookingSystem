@@ -19,12 +19,5 @@ class EmployeeTblRepository extends ServiceEntityRepository
         parent::__construct($registry, EmployeeTbl::class);
     }
 
-    public function findEmployees()
-    {
-        return $this->createQueryBuilder('e')
-            ->select('e.email')
-            ->getQuery()
-            ->getResult()
-        ;
-    }
+
 }

@@ -10,6 +10,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class EmployeeFormType extends AbstractType
 {
+    //builds the form to add an employee
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder

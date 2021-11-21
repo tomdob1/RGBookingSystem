@@ -1,6 +1,7 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
+    <!-- displays the number of offices as buttons. If there are no offices or employees - the user will be prompted to add them -->
     {% if not tableResults %}
         No offices added. Please add an office.
         <div>

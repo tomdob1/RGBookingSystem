@@ -1,17 +1,17 @@
-#index:
-#    path: /
-#    controller: App\Controller\BookingController::index
+index:
+    path: /
+    controller: App\Controller\BookingController::homepage
 
 addEmployee:
-      path: /bookingController/addEmployee
+      path: /addEmployee
       controller: App\Controller\BookingController::addEmployee
 
 addOffice:
-      path: /bookingController/addOffice
+      path: /addOffice
       controller: App\Controller\BookingController::addOffice
 
 booking:
-      path: /bookingController/bookSeat/{day}/{officeId}
+      path: /bookSeat/{day}/{officeId}
       defaults: {controller: App\Controller\BookingController::bookSeatOffice, day: null, officeId: null}
       requirements:
             day: .*

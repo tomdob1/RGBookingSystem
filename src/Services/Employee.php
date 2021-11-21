@@ -18,6 +18,7 @@ class Employee implements Interfaces\EmployeeInterface
             $this->employeeTbl   = $employeeTbl;
     }
 
+    //stores a new employee in the system
     public function addEmployeeToSystem($task): bool{
         $this->entityManager->persist($task);
         $this->entityManager->flush();
