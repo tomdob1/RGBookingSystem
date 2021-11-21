@@ -15,7 +15,6 @@ class Office implements OfficesInterface
     /**
      * Office constructor.
      * @param EntityManagerInterface $entityManager
-     * @param OfficeTbl $officeTbl
      */
     public function __construct(EntityManagerInterface $entityManager){
         $this->entityManager = $entityManager;
