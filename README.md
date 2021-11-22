@@ -1,7 +1,7 @@
 # RGBookingSystem
 Booking System
 
-To run please make sure you have the following installed:
+**To run please make sure you have the following installed:**
 
 -PHP 8
 -Composer
@@ -20,3 +20,11 @@ Once you have cloned the repository please do the following steps:
 
 
 Any issues let me know at tomasz.dob@hotmail.com
+
+**Future changes I would like to make:**
+
+1. Add a dynamic booking form which removes the time input if the 'Whole Day' radio button has been selected.
+2. Logging and error handling.
+3. Make booking portal display a timetable based on the current date, with the option to book a month in advance.
+4. Login portal for employees to make booking on their individual account.
+5. Admin account to add offices and configure booking times.
