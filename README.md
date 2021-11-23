@@ -18,7 +18,7 @@ Once you have cloned the repository please do the following steps:
 6. If you receive any driver errors when downloading the db tables - please check your php.ini file to ensure 'extension=pdo_sqlite' is not commented out (contains a semicolon at the start). Restart the server if this is the case 'symfony server:stop' and then 'symfony serve -d'
 7. Go to localhost:8000 in your browser. 
 
-**Unit tests are located in the folder src/tests**
+**Unit tests are located in the folder tests**
 
 
 Any issues let me know at tomasz.dob@hotmail.com
